@@ -1,0 +1,109 @@
+version: 2.1
+executors:
+  default:
+    working_directory: ~/project
+    docker:
+      - image: circleci/node:latest
+commands:
+  debug_output_dirlist:
+    steps:
+      - run: pwd && cd functions && ls -la
+  restore_npm:
+    steps:
+      - restore_cache:
+          name: Restore npm dependencies
+          keys:
+            - npm-v1-{{ checksum "functions/package-lock.json" }}
+            - npm
+  save_npm:
+    steps:
+      - save_cache:
+          name: Cache npm dependencies
+          key: npm-v1-{{ checksum "functions/package-lock.json" }}
+          paths:
+            - ~/project/functions/node_modules
+jobs:
+  setup:
+    executor:
+      name: default
+    steps:
+      - checkout
+      - restore_npm
+      - debug_output_dirlist
+      - run:
+          name: Install npm
+          command: cd functions && pwd && npm install --save firebase-admin@latest firebase-functions@latest
+      - run:
+          name: Install dependencies
+          command: cd functions && pwd && npm install --save-dev firebase-tools@latest
+      - save_npm
+      - debug_output_dirlist
+  deploy:
+    parameters:
+      env:
+        type: enum
+        enum: ["develop", "staging", "production"]
+      project:
+        type: enum
+        enum: ["test1"]
+      firebase_admin_sdk:
+        type: string
+    executor:
+      name: default
+    steps:
+      - checkout
+#      - restore_npm
+      - run:
+          name: Install npm
+          command: cd functions && ls -la && npm install
+      - run:
+          name: Install dependencies
+          command: cd functions && pwd && npm install --save-dev firebase-tools@latest
+      - run:
+          name: make .env
+          command: cd functions && mv .env.<< parameters.env >> .env
+      - run:
+          name: make json
+          command: cd functions && echo << parameters.firebase_admin_sdk >> >firebaseAdminSDK.json
+      - debug_output_dirlist
+      - run:
+          name: Deploy to << parameters.env >> environment
+          command: functions/node_modules/.bin/firebase deploy --only functions --project << parameters.project >> --token=$FIREBASE_TOKEN
+      - debug_output_dirlist
+workflows:
+  setup_and_deploy:
+    jobs:
+#      - setup
+      - deploy:
+          name: deploy_dev
+          env: develop
+          project: test1
+          firebase_admin_sdk: $FIREBASE_ADMIN_SDK
+#          requires:
+#            - setup
+          filters:
+            branches:
+              ignore:
+                - release
+                - master
+      - deploy:
+          name: deploy_stg
+          env: staging
+          project: test1
+          firebase_admin_sdk: $FIREBASE_ADMIN_SDK
+#          requires:
+#            - setup
+          filters:
+            branches:
+              only: release*
+      - deploy:
+          name: deploy_prod
+          env: production
+          project: test1
+          firebase_admin_sdk: $FIREBASE_ADMIN_SDK
+#          requires:
+#            - setup
+          filters:
+            branches:
+              only: master
+              #only: release
