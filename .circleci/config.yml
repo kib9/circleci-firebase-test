@@ -60,9 +60,6 @@ jobs:
           name: Install dependencies
           command: pwd && npm install --save-dev firebase-tools@latest
       - run:
-          name: make .env
-          command: mv .env.<< parameters.env >> .env
-      - run:
           name: make json
           command: echo << parameters.firebase_admin_sdk >> >firebaseAdminSDK.json
       - debug_output_dirlist
