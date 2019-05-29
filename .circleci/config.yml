@@ -53,20 +53,19 @@ jobs:
     steps:
       - checkout
 #      - restore_npm
-      - working_directory: ~/repo/functions
       - run:
           name: Install npm
           command: ls -la && npm install
       - run:
           name: Install dependencies
-          command: pwd && npm install --save-dev firebase-tools@latest
+          command: cd functions && pwd && npm install --save-dev firebase-tools@latest
       - run:
           name: make json
           command: echo << parameters.firebase_admin_sdk >> >firebaseAdminSDK.json
       - debug_output_dirlist
       - run:
           name: Deploy to << parameters.env >> environment
-          command: node_modules/.bin/firebase deploy --only functions --project << parameters.project >> --token=$FIREBASE_TOKEN
+          command: cd functions && node_modules/.bin/firebase deploy --only functions --project << parameters.project >> --token=$FIREBASE_TOKEN
       - debug_output_dirlist
 workflows:
   setup_and_deploy:
