@@ -1,7 +1,7 @@
 version: 2.1
 executors:
   default:
-    working_directory: ~/repo/functions
+    working_directory: ~/repo
     docker:
       - image: circleci/node:latest
 commands:
@@ -53,6 +53,7 @@ jobs:
     steps:
       - checkout
 #      - restore_npm
+      - working_directory: ~/repo/functions
       - run:
           name: Install npm
           command: ls -la && npm install
