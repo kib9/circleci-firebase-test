@@ -60,6 +60,7 @@ exports.FirestoreBackup = async(event, context) => {
     return res;
   }catch(err){
     console.error(`error occurred when backuping: ${err}`);
+    return err;
   }
 };
 
@@ -74,6 +75,7 @@ FirestoreBackupTest = async() => {
     return res;
   }catch(err){
     console.error(`error occurred when backuping: ${err}`);
+    return err;
   }
 };
 // res = FirestoreBackupTest();
