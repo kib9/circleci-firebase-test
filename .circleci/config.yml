@@ -45,7 +45,7 @@ jobs:
         enum: ["develop", "staging", "production"]
       project:
         type: enum
-        enum: ["test1"]
+        enum: ["newagent-792a0"]
       firebase_admin_sdk:
         type: string
     executor:
