@@ -55,13 +55,13 @@ jobs:
 #      - restore_npm
       - run:
           name: Install npm
-          command: ls -la && npm install
+          command: cd functions && ls -la && npm install
       - run:
           name: Install dependencies
           command: cd functions && pwd && npm install --save-dev firebase-tools@latest
       - run:
           name: make json
-          command: echo << parameters.firebase_admin_sdk >> >firebaseAdminSDK.json
+          command: cd functions && echo << parameters.firebase_admin_sdk >> >firebaseAdminSDK.json
       - debug_output_dirlist
       - run:
           name: Deploy to << parameters.env >> environment
